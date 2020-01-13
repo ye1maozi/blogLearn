@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.learn.blog.dao.CommentMapper" >
+  <resultMap id="BaseResultMap" type="com.learn.blog.pojo.Comment" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="userId" property="userid" jdbcType="INTEGER" />
+    <result column="nickname" property="nickname" jdbcType="VARCHAR" />
+    <result column="articleId" property="articleid" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <association property="article" javaType="com.learn.blog.pojo.Article">
+      <result column="a_id" property="id" jdbcType="INTEGER" />
+      <result column="a_title" property="title" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, userId, nickname, articleId, content, createTime, updateTime, status, ip
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select * from comment
+  </select>
+  <select id="selectCommentsByCateogryId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from comment
+    where articleId = #{articleId,jdbcType=INTEGER} and status = #{status,jdbcType=INTEGER}
+  </select>
+  <select id="queryPageMore" resultMap="BaseResultMap">
+    select
+    c.*,
+    a.id as a_id,
+    a.title as a_title
+    from comment c
+    INNER JOIN article a ON a.id = c.articleId
+    <where>
+      <if test="articleId != null" >
+        and c.articleId = #{articleId}
+      </if>
+      <if test="status != null" >
+        and c.status = #{status}
+      </if>
+    </where>
+    ORDER by c.updateTime DESC
+    limit #{start},#{end}
+  </select>
+  <select id="getCount" resultType="java.lang.Integer">
+    select count(id) from comment
+    <where>
+      <if test="status != null" >
+        and status = #{status}
+      </if>
+    </where>
+  </select>
+  <select id="queryPage" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from comment
+    <where>
+      <if test="articleId != null" >
+        and articleId = #{articleId}
+      </if>
+      <if test="status != null" >
+        and status = #{status}
+      </if>
+    </where>
+    ORDER by updateTime DESC
+    limit #{start},#{end}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from comment
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByTime" resultMap="BaseResultMap">
+    select a.* from comment a
+   ORDER by a.updateTime DESC
+    limit 0,#{limit}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from comment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.learn.blog.pojo.Comment" >
+    insert into comment (id, userId, nickname, 
+      articleId, content, createTime, 
+      updateTime, status, ip
+      )
+    values (#{id,jdbcType=INTEGER}, #{userid,jdbcType=INTEGER}, #{nickname,jdbcType=VARCHAR}, 
+      #{articleid,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{updatetime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{ip,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.learn.blog.pojo.Comment" >
+    insert into comment
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userid != null" >
+        userId,
+      </if>
+      <if test="nickname != null" >
+        nickname,
+      </if>
+      <if test="articleid != null" >
+        articleId,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="updatetime != null" >
+        updateTime,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="ip != null" >
+        ip,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="nickname != null" >
+        #{nickname,jdbcType=VARCHAR},
+      </if>
+      <if test="articleid != null" >
+        #{articleid,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="ip != null" >
+        #{ip,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.learn.blog.pojo.Comment" >
+    update comment
+    <set >
+      <if test="userid != null" >
+        userId = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="nickname != null" >
+        nickname = #{nickname,jdbcType=VARCHAR},
+      </if>
+      <if test="articleid != null" >
+        articleId = #{articleid,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="ip != null" >
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.learn.blog.pojo.Comment" >
+    update comment
+    set userId = #{userid,jdbcType=INTEGER},
+      nickname = #{nickname,jdbcType=VARCHAR},
+      articleId = #{articleid,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=INTEGER},
+      ip = #{ip,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="changeStatus">
+    update comment
+    set status = #{status}
+    where id = #{id}
+  </update>
+  <select id="Count" resultType="int">
+    select count(1) from  comment
+  </select>
+</mapper>

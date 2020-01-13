@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.learn.blog.dao.ArticleMapper" >
+  <resultMap id="BaseResultMap" type="com.learn.blog.pojo.Article" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="userId" property="userid" jdbcType="INTEGER" />
+    <result column="categoryId" property="categoryid" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="author" property="author" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="contentMd" property="contentmd" jdbcType="VARCHAR" />
+    <result column="isMarkdown" property="ismarkdown" jdbcType="TINYINT" />
+    <result column="topImg" property="topimg" jdbcType="VARCHAR" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result property="lookCount" jdbcType="INTEGER" column="look_count"/>
+    <result property="commentCount" jdbcType="INTEGER" column="comment_count"/>
+    <association property="category" javaType="com.learn.blog.pojo.Category">
+      <result column="c_id" property="id" jdbcType="INTEGER" />
+      <result column="c_name" property="name" jdbcType="VARCHAR" />
+      <result column="c_desction" property="desction" jdbcType="VARCHAR" />
+    </association>
+    <collection property="tagsList"  javaType="ArrayList" ofType="com.learn.blog.pojo.Tags">
+      <result property="id" jdbcType="INTEGER" column="t_id"/>
+      <result property="name" jdbcType="VARCHAR" column="t_name"/>
+      <result property="desction" jdbcType="VARCHAR" column="t_desction"/>
+    </collection>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, userId, categoryId, title, author, content, contentMd, isMarkdown, topImg, createTime, 
+    updateTime
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    a.*,
+    c.id AS c_id,
+    c.name AS c_name,
+    c.desction AS c_desction,
+    t.id AS t_id,
+    t.name AS t_name,
+    t.desction AS t_desction
+    from
+    article a
+    INNER JOIN category c ON a.categoryId = c.id
+    INNER JOIN article_tags atag ON a.id = atag.articleId
+    INNER JOIN tags t on t.id = atag.tagId
+  </select>
+  <select id="queryPage" resultMap="BaseResultMap">
+    select
+    a.*,
+    c.id AS c_id,
+    c.name AS c_name,
+    c.desction AS c_desction,
+    t.id AS t_id,
+    t.name AS t_name,
+    t.desction AS t_desction,
+    l.lookCount as look_count,
+    com.commentCount as comment_count
+    from
+    article a
+    INNER JOIN category c ON a.categoryId = c.id
+    INNER JOIN article_tags atag ON a.id = atag.articleId
+    INNER JOIN tags t on t.id = atag.tagId
+    LEFT JOIN (
+        SELECT l.articleId,
+        IFNULL(count(1), 0) AS lookCount
+        FROM article_look l
+        GROUP BY l.articleId
+    ) l on a.id = l.articleId
+    LEFT JOIN (
+        SELECT com.articleId,
+        IFNULL(count(1), 0) AS commentCount
+        FROM comment com
+        WHERE com.status = 0
+        GROUP BY com.articleId
+    ) com on com.articleId = a.id
+    <where>
+      <if test="categoryId != null" >
+        and a.categoryId = #{categoryId}
+      </if>
+      <if test="tagId != null" >
+        and  t.id = #{tagId}
+      </if>
+      <if test="year != null" >
+        and  year(a.createTime) = #{year}
+      </if>
+      <if test="month != null" >
+        and  month(a.createTime) = #{month}
+      </if>
+    </where>
+    ORDER by a.updateTime DESC
+    limit #{start},#{end}
+  </select>
+  <select id="selectByTime" resultMap="BaseResultMap">
+    select a.* from article a
+   ORDER by a.updateTime DESC
+    limit 0,#{limit}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    a.*,
+    c.id AS c_id,
+    c.name AS c_name,
+    c.desction AS c_desction,
+    t.id AS t_id,
+    t.name AS t_name,
+    t.desction AS t_desction,
+    l.lookCount as look_count,
+    com.commentCount as comment_count
+    from
+    article a
+    INNER JOIN category c ON a.categoryId = c.id
+    INNER JOIN article_tags atag ON a.id = atag.articleId
+    INNER JOIN tags t on t.id = atag.tagId
+     LEFT JOIN (
+        SELECT l.articleId,
+        IFNULL(count(1), 0) AS lookCount
+        FROM article_look l
+        GROUP BY l.articleId
+    ) l on a.id = l.articleId
+    LEFT JOIN (
+        SELECT com.articleId,
+        IFNULL(count(1), 0) AS commentCount
+        FROM comment com
+        WHERE com.status = 0
+        GROUP BY com.articleId
+    ) com on com.articleId = a.id
+    where a.id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from article
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.learn.blog.pojo.Article"  useGeneratedKeys="true" keyProperty="id">
+    insert into article (id, userId, categoryId, 
+      title, author, content, 
+      contentMd, isMarkdown, topImg, 
+      createTime, updateTime)
+    values (#{id,jdbcType=INTEGER}, #{userid,jdbcType=INTEGER}, #{categoryid,jdbcType=INTEGER}, 
+      #{title,jdbcType=VARCHAR}, #{author,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{contentmd,jdbcType=VARCHAR}, #{ismarkdown,jdbcType=TINYINT}, #{topimg,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.learn.blog.pojo.Article" >
+    insert into article
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userid != null" >
+        userId,
+      </if>
+      <if test="categoryid != null" >
+        categoryId,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="author != null" >
+        author,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="contentmd != null" >
+        contentMd,
+      </if>
+      <if test="ismarkdown != null" >
+        isMarkdown,
+      </if>
+      <if test="topimg != null" >
+        topImg,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="updatetime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="categoryid != null" >
+        #{categoryid,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null" >
+        #{author,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="contentmd != null" >
+        #{contentmd,jdbcType=VARCHAR},
+      </if>
+      <if test="ismarkdown != null" >
+        #{ismarkdown,jdbcType=TINYINT},
+      </if>
+      <if test="topimg != null" >
+        #{topimg,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.learn.blog.pojo.Article" >
+    update article
+    <set >
+      <if test="userid != null" >
+        userId = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="categoryid != null" >
+        categoryId = #{categoryid,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null" >
+        author = #{author,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="contentmd != null" >
+        contentMd = #{contentmd,jdbcType=VARCHAR},
+      </if>
+      <if test="ismarkdown != null" >
+        isMarkdown = #{ismarkdown,jdbcType=TINYINT},
+      </if>
+      <if test="topimg != null" >
+        topImg = #{topimg,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.learn.blog.pojo.Article" >
+    update article
+    set userId = #{userid,jdbcType=INTEGER},
+      categoryId = #{categoryid,jdbcType=INTEGER},
+      title = #{title,jdbcType=VARCHAR},
+      author = #{author,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      contentMd = #{contentmd,jdbcType=VARCHAR},
+      isMarkdown = #{ismarkdown,jdbcType=TINYINT},
+      topImg = #{topimg,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      updateTime = #{updatetime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="queyArticleArchives" resultType="com.learn.blog.util.ArticleArchivesVo">
+    select year(createtime) as year,month(createtime) as month,count(*) as count
+    from article
+    group by year(createtime),month(createtime)
+    ORDER BY year(createtime) DESC, month(createtime) DESC
+  </select>
+</mapper>

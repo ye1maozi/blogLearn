@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.learn.blog.dao.PermissionMapper">
+  <resultMap id="BaseResultMap" type="com.learn.blog.pojo.Permission">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="desction" jdbcType="VARCHAR" property="desction" />
+    <result column="pid" jdbcType="INTEGER" property="pid" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="path" jdbcType="VARCHAR" property="path" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="component" jdbcType="VARCHAR" property="component" />
+    <result column="apiurl" jdbcType="VARCHAR" property="apiurl" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, name, desction, pid, type, path, icon, status, component,apiurl
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from permission
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from permission
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.learn.blog.pojo.Permission">
+    insert into permission (id, name, desction, 
+      pid, type, path, icon, 
+      status,component,apiurl)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{desction,jdbcType=VARCHAR}, 
+      #{pid,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{path,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, 
+      #{status,jdbcType=TINYINT}, #{component,jdbcType=VARCHAR},#{apiurl,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.learn.blog.pojo.Permission">
+    insert into permission
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="desction != null">
+        desction,
+      </if>
+      <if test="pid != null">
+        pid,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="path != null">
+        path,
+      </if>
+      <if test="icon != null">
+        icon,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="component != null">
+        component,
+      </if>
+      <if test="apiurl != null">
+        apiurl,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="desction != null">
+        #{desction,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null">
+        #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="path != null">
+        #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null">
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="component != null">
+        #{component,jdbcType=VARCHAR},
+      </if>
+      <if test="apiurl != null">
+        #{apiurl,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.learn.blog.pojo.Permission">
+    update permission
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="desction != null">
+        desction = #{desction,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null">
+        pid = #{pid,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="path != null">
+        path = #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null">
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="component != null">
+        component = #{component,jdbcType=VARCHAR},
+      </if>
+      <if test="apiurl != null">
+        apiurl = #{apiurl,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.learn.blog.pojo.Permission">
+    update permission
+    set name = #{name,jdbcType=VARCHAR},
+      desction = #{desction,jdbcType=VARCHAR},
+      pid = #{pid,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      path = #{path,jdbcType=VARCHAR},
+      icon = #{icon,jdbcType=VARCHAR},
+      status = #{status,jdbcType=TINYINT},
+      component = #{component,jdbcType=VARCHAR},
+      apiurl = #{apiurl,jdbcType=VARCHAR},
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select * from permission
+  </select>
+
+  <select id="listPermissionByUserName" resultMap="BaseResultMap">
+    select  p.id, p.name, p.desction, p.pid, p.type, p.path, p.icon, p.status,p.component,p.apiurl from user u
+        left join user_role ru on u.id = ru.userId
+        left join role r on r.id = ru.groupId
+        left join role_permission rp on rp.groupId = r.id
+        left join permission p on p.id = rp.permissionId
+    where u.name = #{name,jdbcType=VARCHAR}
+  </select>
+
+  <select id="listPermissionByRole" resultMap="BaseResultMap">
+    select p.id, p.name, p.desction, p.pid, p.type, p.path, p.icon, p.status,p.component,p.apiurl from role r
+        left join role_permission rp on rp.groupId = r.id
+        left join permission p on p.id = rp.permissionId
+    where r.name = #{name,jdbcType=VARCHAR}
+  </select>
+
+</mapper>

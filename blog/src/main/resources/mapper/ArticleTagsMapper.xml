@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.learn.blog.dao.ArticleTagsMapper" >
+  <resultMap id="BaseResultMap" type="com.learn.blog.pojo.ArticleTags" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="articleId" property="articleid" jdbcType="INTEGER" />
+    <result column="tagId" property="tagid" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, articleId, tagId
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select * from article_tags
+  </select>
+  <select id="selectByArticleId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select * from article_tags
+    where articleId = #{articleid,jdbcType=INTEGER}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from article_tags
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from article_tags
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByArticleAndTagId"  parameterType="java.lang.Integer">
+    delete from article_tags
+    where articleId = #{articleid}
+    and tagId = #{tagid}
+  </delete>
+  <insert id="insert" parameterType="com.learn.blog.pojo.ArticleTags" >
+    insert into article_tags (id, articleId, tagId
+      )
+    values (#{id,jdbcType=INTEGER}, #{articleid,jdbcType=INTEGER}, #{tagid,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.learn.blog.pojo.ArticleTags" >
+    insert into article_tags
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="articleid != null" >
+        articleId,
+      </if>
+      <if test="tagid != null" >
+        tagId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="articleid != null" >
+        #{articleid,jdbcType=INTEGER},
+      </if>
+      <if test="tagid != null" >
+        #{tagid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.learn.blog.pojo.ArticleTags" >
+    update article_tags
+    <set >
+      <if test="articleid != null" >
+        articleId = #{articleid,jdbcType=INTEGER},
+      </if>
+      <if test="tagid != null" >
+        tagId = #{tagid,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.learn.blog.pojo.ArticleTags" >
+    update article_tags
+    set articleId = #{articleid,jdbcType=INTEGER},
+      tagId = #{tagid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
